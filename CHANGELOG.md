@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-02-14
+
+### Added
+- Lambda modules for serverless functions
+  - `lambda/standard` - Generic Lambda module for any runtime
+  - `lambda/go` - Go-specific Lambda module with optimized defaults
+- Support for reserved concurrent executions
+- Support for architectures (x86_64 or arm64)
+- Optional environment variables block (only created when needed)
+- Go module defaults to arm64 (Graviton2) for better price/performance
+
+### Changed
+- IAM role naming: `{function_name}-role` to avoid conflicts
+
 ## [1.2.0] - 2026-02-14
 
 ### Added
