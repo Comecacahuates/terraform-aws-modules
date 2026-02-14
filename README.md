@@ -40,7 +40,6 @@ modules/<module-name>/
 ## Available Modules
 
 - `s3-cloudfront-website` - Static website hosting with S3 and CloudFront
-- `terraform-backend` - S3 and DynamoDB backend for Terraform state
 
 ## Contributing
 
