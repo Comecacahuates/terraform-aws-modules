@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-02-14
+
+### Changed
+- Moved s3-cloudfront-website module to root directory
+- Removed modules/ folder structure for simpler repository layout
+
+### Removed
+- terraform-backend module (moved to separate repository)
+
 ## [1.0.0] - 2026-02-14
 
 ### Added
