@@ -14,6 +14,12 @@ variable "allowed_methods" {
   default     = "GET,POST,PUT,DELETE,OPTIONS"
 }
 
+variable "allowed_headers" {
+  description = "Allowed headers for CORS"
+  type        = string
+  default     = "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token"
+}
+
 variable "allowed_origin" {
   description = "Allowed origin for CORS"
   type        = string

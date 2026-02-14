@@ -53,7 +53,7 @@ variable "request_model_name" {
 }
 
 variable "cors_origin" {
-  description = "CORS origin for response"
+  description = "CORS origin for response headers"
   type        = string
   default     = "*"
 }

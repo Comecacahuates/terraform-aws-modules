@@ -34,6 +34,18 @@ variable "cors_origin" {
   default     = "*"
 }
 
+variable "cors_methods" {
+  description = "CORS allowed methods"
+  type        = string
+  default     = "GET,POST,PUT,DELETE,OPTIONS"
+}
+
+variable "cors_headers" {
+  description = "CORS allowed headers"
+  type        = string
+  default     = "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token"
+}
+
 variable "authorization" {
   description = "Authorization type (NONE, AWS_IAM, CUSTOM, COGNITO_USER_POOLS)"
   type        = string

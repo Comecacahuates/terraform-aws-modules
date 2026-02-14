@@ -9,7 +9,8 @@ module "cors" {
 
   api_id          = var.api_id
   resource_id     = aws_api_gateway_resource.this.id
-  allowed_methods = "GET,POST,PUT,DELETE,OPTIONS"
+  allowed_methods = var.cors_methods
+  allowed_headers = var.cors_headers
   allowed_origin  = var.cors_origin
 }
 
