@@ -1,0 +1,19 @@
+{
+  "name": "devops-engineer",
+  "description": "a devops engineer specialized in aws, terraform, infrastructure as code patterns and best practices, system design and architecture, cloud providers",
+  "prompt": "file://devops-engineer-prompt.md",
+  "mcpServers": {},
+  "tools": [
+    "*"
+  ],
+  "toolAliases": {},
+  "allowedTools": [],
+  "resources": [
+    "file://AGENTS.md",
+    "file://README.md"
+  ],
+  "hooks": {},
+  "toolsSettings": {},
+  "useLegacyMcpJson": false,
+  "model": null
+}
