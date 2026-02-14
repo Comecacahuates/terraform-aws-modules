@@ -29,6 +29,5 @@ terraform-modules/
 ## Versioning Strategy
 
 - Use Git tags with semantic versioning: `v1.0.0`
-- Tag format: `git tag -a v1.0.0 -m "Release description"`
 - Never modify or delete published tags
 - Reference modules with version tags in production
