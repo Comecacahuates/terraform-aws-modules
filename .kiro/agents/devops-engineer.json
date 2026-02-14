@@ -10,7 +10,8 @@
   "allowedTools": [],
   "resources": [
     "file://AGENTS.md",
-    "file://README.md"
+    "file://README.md",
+    "file://.agents/steering/**/*.md"
   ],
   "hooks": {},
   "toolsSettings": {},
