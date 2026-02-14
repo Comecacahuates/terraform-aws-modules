@@ -1,6 +1,11 @@
 variable "bucket_name" {
   description = "Name of the S3 bucket"
   type        = string
+
+  validation {
+    condition     = can(regex("^[a-z0-9][a-z0-9-]*[a-z0-9]$", var.bucket_name))
+    error_message = "Bucket name must be lowercase alphanumeric with hyphens, and cannot start or end with a hyphen"
+  }
 }
 
 variable "domain_name" {
@@ -25,6 +30,12 @@ variable "default_root_object" {
   description = "Default root object"
   type        = string
   default     = "index.html"
+}
+
+variable "enable_spa_routing" {
+  description = "Enable SPA routing (404/403 errors return index.html)"
+  type        = bool
+  default     = true
 }
 
 variable "tags" {

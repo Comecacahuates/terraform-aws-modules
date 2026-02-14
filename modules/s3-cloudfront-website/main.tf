@@ -3,6 +3,14 @@ resource "aws_s3_bucket" "website" {
   tags   = var.tags
 }
 
+resource "aws_s3_bucket_versioning" "website" {
+  bucket = aws_s3_bucket.website.id
+
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
 resource "aws_s3_bucket_public_access_block" "website" {
   bucket                  = aws_s3_bucket.website.id
   block_public_acls       = true
@@ -20,6 +28,7 @@ resource "aws_cloudfront_origin_access_control" "website" {
 
 resource "aws_cloudfront_distribution" "website" {
   enabled             = true
+  is_ipv6_enabled     = true
   default_root_object = var.default_root_object
   price_class         = var.price_class
   aliases             = var.domain_name != null ? [var.domain_name] : []
@@ -42,6 +51,28 @@ resource "aws_cloudfront_distribution" "website" {
       cookies {
         forward = "none"
       }
+    }
+
+    min_ttl     = 0
+    default_ttl = 3600
+    max_ttl     = 86400
+  }
+
+  dynamic "custom_error_response" {
+    for_each = var.enable_spa_routing ? [1] : []
+    content {
+      error_code         = 404
+      response_code      = 200
+      response_page_path = "/index.html"
+    }
+  }
+
+  dynamic "custom_error_response" {
+    for_each = var.enable_spa_routing ? [1] : []
+    content {
+      error_code         = 403
+      response_code      = 200
+      response_page_path = "/index.html"
     }
   }
 
