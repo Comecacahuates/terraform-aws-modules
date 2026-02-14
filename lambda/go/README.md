@@ -56,6 +56,8 @@ module "my_go_lambda" {
 | log_retention_days | CloudWatch log retention in days | number | 7 | no |
 | environment_variables | Environment variables for the Lambda function | map(string) | {} | no |
 | policy_statements | IAM policy statements for Lambda permissions | list(object) | [] | no |
+| reserved_concurrent_executions | Reserved concurrent executions (-1 for unreserved) | number | -1 | no |
+| architectures | Instruction set architecture (x86_64 or arm64) | list(string) | ["arm64"] | no |
 | tags | Tags to apply to all resources | map(string) | {} | no |
 
 ## Outputs
@@ -72,9 +74,13 @@ module "my_go_lambda" {
 ## Go Binary Requirements
 
 Your Go binary must be:
-1. Compiled for Linux AMD64: `GOOS=linux GOARCH=amd64 go build -o bootstrap`
+1. Compiled for Linux with appropriate architecture:
+   - ARM64 (default): `GOOS=linux GOARCH=arm64 go build -o bootstrap`
+   - AMD64: `GOOS=linux GOARCH=amd64 go build -o bootstrap`
 2. Zipped: `zip bootstrap.zip bootstrap`
 3. Use AWS Lambda Go SDK: `github.com/aws/aws-lambda-go/lambda`
+
+**Note**: This module defaults to `arm64` (Graviton2) for better price/performance. Use `architectures = ["x86_64"]` if needed.
 
 ## Example Go Handler
 
@@ -110,6 +116,7 @@ func main() {
 - **Handler**: Fixed to `bootstrap` (no need to specify)
 - **Runtime**: Fixed to `provided.al2023` (no need to specify)
 - **Memory**: Default 256 MB instead of 128 MB (better for Go)
+- **Architecture**: Default arm64 instead of x86_64 (better price/performance)
 - Everything else is the same as `lambda/standard`
 
 ## See Also

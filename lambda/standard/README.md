@@ -89,6 +89,8 @@ module "go_lambda" {
 | log_retention_days | CloudWatch log retention in days | number | 7 | no |
 | environment_variables | Environment variables for the Lambda function | map(string) | {} | no |
 | policy_statements | IAM policy statements for Lambda permissions | list(object) | [] | no |
+| reserved_concurrent_executions | Reserved concurrent executions (-1 for unreserved) | number | -1 | no |
+| architectures | Instruction set architecture (x86_64 or arm64) | list(string) | ["x86_64"] | no |
 | tags | Tags to apply to all resources | map(string) | {} | no |
 
 ## Outputs
@@ -112,7 +114,9 @@ module "go_lambda" {
 
 ## Notes
 
-- The IAM role name will be the same as the function name
+- The IAM role name will be `{function_name}-role` to avoid conflicts
 - CloudWatch log group is created before the Lambda function
 - Basic execution role (AWSLambdaBasicExecutionRole) is automatically attached
 - Custom policy statements are optional and only created if provided
+- Environment variables block is only created if variables are provided
+- Default architecture is x86_64, use arm64 for Graviton2 (better price/performance)

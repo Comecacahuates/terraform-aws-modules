@@ -3,7 +3,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 6.0"
+      version = ">= 6.0"
     }
   }
 }
@@ -16,9 +16,11 @@ module "lambda" {
   runtime       = "provided.al2023"
   source_file   = var.source_file
 
-  memory_size        = var.memory_size
-  timeout            = var.timeout
-  log_retention_days = var.log_retention_days
+  memory_size                    = var.memory_size
+  timeout                        = var.timeout
+  log_retention_days             = var.log_retention_days
+  reserved_concurrent_executions = var.reserved_concurrent_executions
+  architectures                  = var.architectures
 
   environment_variables = var.environment_variables
   policy_statements     = var.policy_statements

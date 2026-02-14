@@ -1,14 +1,3 @@
-terraform {
-  required_version = ">= 1.0"
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 6.0"
-    }
-  }
-}
-
-# CloudWatch Log Group
 resource "aws_cloudwatch_log_group" "lambda" {
   name              = "/aws/lambda/${var.function_name}"
   retention_in_days = var.log_retention_days
@@ -18,7 +7,7 @@ resource "aws_cloudwatch_log_group" "lambda" {
 
 # IAM Role
 resource "aws_iam_role" "lambda" {
-  name = var.function_name
+  name = "${var.function_name}-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -63,11 +52,16 @@ resource "aws_lambda_function" "lambda" {
   filename         = var.source_file
   source_code_hash = filebase64sha256(var.source_file)
 
-  memory_size = var.memory_size
-  timeout     = var.timeout
+  memory_size                    = var.memory_size
+  timeout                        = var.timeout
+  reserved_concurrent_executions = var.reserved_concurrent_executions
+  architectures                  = var.architectures
 
-  environment {
-    variables = var.environment_variables
+  dynamic "environment" {
+    for_each = length(var.environment_variables) > 0 ? [1] : []
+    content {
+      variables = var.environment_variables
+    }
   }
 
   depends_on = [

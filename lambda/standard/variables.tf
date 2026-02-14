@@ -57,3 +57,15 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "reserved_concurrent_executions" {
+  description = "Reserved concurrent executions (-1 for unreserved)"
+  type        = number
+  default     = -1
+}
+
+variable "architectures" {
+  description = "Instruction set architecture (x86_64 or arm64)"
+  type        = list(string)
+  default     = ["x86_64"]
+}
