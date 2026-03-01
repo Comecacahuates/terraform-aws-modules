@@ -15,7 +15,7 @@
   },
   "tools": ["*"],
   "toolAliases": {},
-  "allowedTools": [],
+  "allowedTools": ["fs_write", "fs_read", "web_search", "web_fetch"],
   "resources": [
     "file://AGENTS.md",
     "file://README.md",
