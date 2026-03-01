@@ -10,7 +10,8 @@ module "lambda" {
   timeout            = var.timeout
   log_retention_days = var.log_retention_days
 
-  environment_variables = var.environment_variables
-  policy_statements     = var.policy_statements
-  tags                  = var.tags
+  environment_variables          = var.environment_variables
+  policy_statements              = var.policy_statements
+  api_gateway_validation_schema  = var.api_gateway_validation_schema
+  tags                           = var.tags
 }

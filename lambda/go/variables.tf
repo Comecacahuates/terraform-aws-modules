@@ -11,13 +11,13 @@ variable "source_file" {
 variable "memory_size" {
   description = "Amount of memory in MB"
   type        = number
-  default     = 256
+  default     = 128
 }
 
 variable "timeout" {
   description = "Timeout in seconds"
   type        = number
-  default     = 10
+  default     = 3
 }
 
 variable "log_retention_days" {
@@ -58,4 +58,10 @@ variable "architectures" {
   description = "Instruction set architecture (x86_64 or arm64)"
   type        = list(string)
   default     = ["x86_64"]
+}
+
+variable "api_gateway_validation_schema" {
+  description = "JSON schema for API Gateway request validation (API Gateway specific)"
+  type        = string
+  default     = null
 }

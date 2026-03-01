@@ -69,3 +69,9 @@ variable "architectures" {
   type        = list(string)
   default     = ["x86_64"]
 }
+
+variable "api_gateway_validation_schema" {
+  description = "JSON schema for API Gateway request validation (API Gateway specific)"
+  type        = string
+  default     = null
+}

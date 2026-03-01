@@ -27,3 +27,8 @@ output "log_group_name" {
   description = "Name of the CloudWatch log group"
   value       = module.lambda.log_group_name
 }
+
+output "api_gateway_validation_schema" {
+  description = "JSON schema for API Gateway request validation"
+  value       = module.lambda.api_gateway_validation_schema
+}
