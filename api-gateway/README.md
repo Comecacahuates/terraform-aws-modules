@@ -1,138 +1,134 @@
-# Decomposed API Gateway Modules
+# API Gateway Modules
 
-## Module Hierarchy
+Reusable Terraform modules for AWS API Gateway following DDD/bounded context patterns.
 
-```
-shared/
-├── api_cors_preflight/          # Single responsibility: CORS OPTIONS
-├── api_lambda_integration/      # Single responsibility: Lambda integration
-└── api_gateway_endpoint/        # Composite: Uses above modules
-```
+## Modules
 
-## Design Principles
+- **rest-api** - Base REST API with deployment, stage, and logging
+- **rest-endpoint** - API Gateway resource + CORS + Lambda integration
+- **lambda-integration** - Lambda integration for existing resources
+- **cors-preflight** - CORS preflight (OPTIONS) for existing resources
 
-Following **Single Responsibility Principle** and **Composition over Monoliths**:
+## Usage Pattern
 
-### 1. `api_cors_preflight` - CORS OPTIONS Method
-**Responsibility:** Configure CORS preflight (OPTIONS method)
+### Bounded Context (Business Logic)
 
-**Usage:**
-```hcl
-module "cors" {
-  source = "../../shared/api_cors_preflight"
-  
-  api_id          = aws_api_gateway_rest_api.api.id
-  resource_id     = aws_api_gateway_resource.resource.id
-  allowed_methods = "GET,POST,OPTIONS"
-  allowed_origin  = "*"
-}
-```
-
-### 2. `api_lambda_integration` - Lambda Integration
-**Responsibility:** Connect API Gateway method to Lambda function
-
-**Usage:**
-```hcl
-module "lambda_integration" {
-  source = "../../shared/api_lambda_integration"
-  
-  api_id               = aws_api_gateway_rest_api.api.id
-  resource_id          = aws_api_gateway_resource.resource.id
-  http_method          = "POST"
-  lambda_invoke_arn    = aws_lambda_function.handler.invoke_arn
-  lambda_function_name = aws_lambda_function.handler.function_name
-  api_execution_arn    = aws_api_gateway_rest_api.api.execution_arn
-  cors_origin          = "*"
-}
-```
-
-### 3. `api_gateway_endpoint` - Composite Module
-**Responsibility:** Combine resource + CORS + Lambda integration
-
-**Usage:**
-```hcl
-module "endpoint" {
-  source = "../../shared/api_gateway_endpoint"
-  
-  api_id               = aws_api_gateway_rest_api.api.id
-  parent_id            = aws_api_gateway_rest_api.api.root_resource_id
-  path_part            = "leads"
-  http_method          = "POST"
-  lambda_invoke_arn    = var.lambda.invoke_arn
-  lambda_function_name = var.lambda.function_name
-  api_execution_arn    = aws_api_gateway_rest_api.api.execution_arn
-}
-```
-
-## Benefits of Decomposition
-
-### Flexibility
-- Use `api_cors_preflight` alone for non-Lambda endpoints
-- Use `api_lambda_integration` alone when resource already exists
-- Use `api_gateway_endpoint` for complete endpoint setup
-
-### Testability
-- Test CORS configuration independently
-- Test Lambda integration independently
-- Test composition separately
-
-### Reusability
-- CORS module works with any integration type (Lambda, HTTP, Mock)
-- Lambda integration module works with existing resources
-- Endpoint module provides convenience wrapper
-
-### Maintainability
-- Change CORS behavior in one place
-- Change Lambda integration pattern in one place
-- Composite module automatically gets updates
-
-## Example: Mix and Match
+Define Lambda handlers with validation schemas:
 
 ```hcl
-# Create resource manually
-resource "aws_api_gateway_resource" "custom" {
-  rest_api_id = aws_api_gateway_rest_api.api.id
-  parent_id   = aws_api_gateway_rest_api.api.root_resource_id
-  path_part   = "custom"
+# modules/bounded_contexts/leads/application/lambda_api_create_lead.tf
+module "create_lead_lambda" {
+  source = "git::https://github.com/Comecacahuates/terraform-modules.git//lambda/go?ref=v1.5.0"
+
+  function_name = "app-${var.environment}-leads-create"
+  source_file   = "${var.lambda_packages_dir}/leads_create.zip"
+
+  environment_variables = {
+    TABLE_NAME = var.dynamodb_table.name
+  }
+
+  policy_statements = [
+    {
+      Action   = ["dynamodb:PutItem"]
+      Resource = [var.dynamodb_table.arn]
+    }
+  ]
+
+  api_gateway_validation_schema = jsonencode({
+    type     = "object"
+    required = ["name", "email"]
+    properties = {
+      name  = { type = "string", minLength = 1 }
+      email = { type = "string", pattern = "^[^@]+@[^@]+\\.[^@]+$" }
+    }
+  })
+
+  tags = var.tags
 }
 
-# Add CORS
-module "custom_cors" {
-  source = "../../shared/api_cors_preflight"
-  
-  api_id      = aws_api_gateway_rest_api.api.id
-  resource_id = aws_api_gateway_resource.custom.id
+# modules/bounded_contexts/leads/application/outputs.tf
+output "lambda_api_create_lead" {
+  value = {
+    function_name     = module.create_lead_lambda.function_name
+    invoke_arn        = module.create_lead_lambda.invoke_arn
+    validation_schema = module.create_lead_lambda.api_gateway_validation_schema
+  }
+}
+```
+
+### API Module (Infrastructure)
+
+Wire Lambda handlers to API Gateway:
+
+```hcl
+# modules/apis/public/main.tf
+module "public_api" {
+  source = "git::https://github.com/Comecacahuates/terraform-modules.git//api-gateway/rest-api?ref=v1.5.0"
+
+  api_name    = "app-${var.environment}-public-api"
+  environment = var.environment
+
+  deployment_triggers = {
+    leads_create = var.lambda_api_create_lead.invoke_arn
+  }
+
+  tags = var.tags
 }
 
-# Add multiple methods to same resource
-module "get_custom" {
-  source = "../../shared/api_lambda_integration"
-  
-  api_id            = aws_api_gateway_rest_api.api.id
-  resource_id       = aws_api_gateway_resource.custom.id
-  http_method       = "GET"
-  lambda_invoke_arn = var.get_lambda.invoke_arn
-  # ...
+resource "aws_api_gateway_request_validator" "body" {
+  rest_api_id           = module.public_api.api_id
+  name                  = "validate-body"
+  validate_request_body = true
 }
 
-module "post_custom" {
-  source = "../../shared/api_lambda_integration"
-  
-  api_id            = aws_api_gateway_rest_api.api.id
-  resource_id       = aws_api_gateway_resource.custom.id
+# POST /leads (with validation)
+module "create_lead_endpoint" {
+  source = "git::https://github.com/Comecacahuates/terraform-modules.git//api-gateway/rest-endpoint?ref=v1.5.0"
+
+  api_id            = module.public_api.api_id
+  parent_id         = module.public_api.root_resource_id
+  path_part         = "leads"
   http_method       = "POST"
-  lambda_invoke_arn = var.post_lambda.invoke_arn
-  # ...
+  api_execution_arn = module.public_api.execution_arn
+
+  lambda_invoke_arn    = var.lambda_api_create_lead.invoke_arn
+  lambda_function_name = var.lambda_api_create_lead.function_name
+
+  request_validator_id = aws_api_gateway_request_validator.body.id
+  request_model_schema = var.lambda_api_create_lead.validation_schema
+
+  cors_origin = var.cors_allowed_origin
+}
+
+# GET /leads (no validation)
+module "list_leads_endpoint" {
+  source = "git::https://github.com/Comecacahuates/terraform-modules.git//api-gateway/rest-endpoint?ref=v1.5.0"
+
+  api_id            = module.public_api.api_id
+  parent_id         = module.public_api.root_resource_id
+  path_part         = "leads"
+  http_method       = "GET"
+  api_execution_arn = module.public_api.execution_arn
+
+  lambda_invoke_arn    = var.lambda_api_list_leads.invoke_arn
+  lambda_function_name = var.lambda_api_list_leads.function_name
+
+  cors_origin = var.cors_allowed_origin
 }
 ```
 
-## When to Use Which
+## Benefits
 
-| Scenario | Use Module |
-|----------|------------|
-| Simple endpoint (resource + CORS + Lambda) | `api_gateway_endpoint` |
-| Multiple methods on same resource | `api_lambda_integration` (per method) |
-| Non-Lambda integration needs CORS | `api_cors_preflight` |
-| Custom resource structure | Individual modules |
+- **Clean separation**: Business logic in bounded contexts, infrastructure in API modules
+- **Type-safe**: Validation schemas flow from Lambda to API Gateway
+- **Concise**: ~30 lines per Lambda handler, ~15 lines per endpoint
+- **Flexible**: Validation is optional, just omit when not needed
+- **DDD-aligned**: Bounded contexts are self-contained
 
-This follows the Unix philosophy: **Do one thing well, compose for complexity**.
+## Module Details
+
+See individual module READMEs for detailed documentation:
+- [rest-api/README.md](./rest-api/README.md)
+- [rest-endpoint/README.md](./rest-endpoint/README.md)
+- [lambda-integration/README.md](./lambda-integration/README.md)
+- [cors-preflight/README.md](./cors-preflight/README.md)
