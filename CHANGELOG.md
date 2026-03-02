@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-03-01
+
+### Added
+- API Gateway rest-resource module
+  - `api-gateway/rest-resource` - Resource with optional CORS preflight
+  - Fixes CORS conflicts when multiple methods target same resource
+- API Gateway method-handler module
+  - `api-gateway/method-handler` - HTTP method + Lambda integration + validation
+  - Absorbs functionality from deprecated lambda-integration module
+
+### Changed
+- **BREAKING**: API Gateway module structure refactored
+  - Use `rest-resource` + `method-handler` instead of `rest-endpoint`
+  - One CORS configuration per resource, multiple methods per resource
+
+### Removed
+- **BREAKING**: Deprecated API Gateway modules removed
+  - `api-gateway/rest-endpoint` - Use `rest-resource` + `method-handler`
+  - `api-gateway/lambda-integration` - Merged into `method-handler`
+  - `api-gateway/cors-preflight` - Merged into `rest-resource`
+  - `api-gateway/endpoint` - Old module removed
+
 ## [1.5.0] - 2026-03-01
 
 ### Added
