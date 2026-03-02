@@ -40,6 +40,12 @@ variable "authorizer_id" {
   default     = null
 }
 
+variable "api_key_required" {
+  description = "Require API key for this method"
+  type        = bool
+  default     = false
+}
+
 variable "request_model_schema" {
   description = "JSON schema for request validation (creates validator and model if provided)"
   type        = string

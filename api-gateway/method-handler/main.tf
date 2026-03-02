@@ -21,6 +21,7 @@ resource "aws_api_gateway_method" "this" {
   http_method          = var.http_method
   authorization        = var.authorization
   authorizer_id        = var.authorizer_id
+  api_key_required     = var.api_key_required
   request_validator_id = var.request_model_schema != null ? aws_api_gateway_request_validator.this[0].id : null
 
   request_models = var.request_model_schema != null ? {
