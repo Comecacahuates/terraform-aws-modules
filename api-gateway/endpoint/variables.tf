@@ -70,6 +70,12 @@ variable "request_model_name" {
   default     = null
 }
 
+variable "request_model_schema" {
+  description = "JSON schema for request validation (creates model if provided)"
+  type        = string
+  default     = null
+}
+
 variable "api_execution_arn" {
   description = "API Gateway execution ARN for Lambda permissions"
   type        = string

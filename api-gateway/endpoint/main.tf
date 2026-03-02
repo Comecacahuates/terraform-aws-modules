@@ -4,6 +4,15 @@ resource "aws_api_gateway_resource" "this" {
   path_part   = var.path_part
 }
 
+resource "aws_api_gateway_model" "this" {
+  count = var.request_model_schema != null ? 1 : 0
+
+  rest_api_id  = var.api_id
+  name         = replace("${var.path_part}${var.http_method}Model", "/[^a-zA-Z0-9]/", "")
+  content_type = "application/json"
+  schema       = var.request_model_schema
+}
+
 module "cors" {
   source = "../cors-preflight"
 
@@ -26,6 +35,6 @@ module "lambda_integration" {
   authorization        = var.authorization
   authorizer_id        = var.authorizer_id
   request_validator_id = var.request_validator_id
-  request_model_name   = var.request_model_name
+  request_model_name   = var.request_model_schema != null ? aws_api_gateway_model.this[0].name : var.request_model_name
   cors_origin          = var.cors_origin
 }
