@@ -58,3 +58,42 @@ resource "aws_cloudwatch_log_group" "this" {
 
   tags = local.common_tags
 }
+
+resource "aws_api_gateway_usage_plan" "this" {
+  name        = "${var.api_name}-usage-plan"
+  description = var.usage_plan_description
+
+  api_stages {
+    api_id = aws_api_gateway_rest_api.this.id
+    stage  = aws_api_gateway_stage.this.stage_name
+  }
+
+  quota_settings {
+    limit  = var.usage_plan_quota_limit
+    period = var.usage_plan_quota_period
+  }
+
+  throttle_settings {
+    burst_limit = var.usage_plan_burst_limit
+    rate_limit  = var.usage_plan_rate_limit
+  }
+
+  tags = local.common_tags
+}
+
+resource "aws_api_gateway_api_key" "this" {
+  count = var.api_key_name != null ? 1 : 0
+
+  name    = var.api_key_name
+  enabled = true
+
+  tags = local.common_tags
+}
+
+resource "aws_api_gateway_usage_plan_key" "this" {
+  count = var.api_key_name != null ? 1 : 0
+
+  key_id        = aws_api_gateway_api_key.this[0].id
+  key_type      = "API_KEY"
+  usage_plan_id = aws_api_gateway_usage_plan.this.id
+}
