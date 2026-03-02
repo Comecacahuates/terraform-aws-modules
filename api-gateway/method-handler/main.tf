@@ -1,3 +1,12 @@
+resource "aws_api_gateway_model" "this" {
+  count = var.request_model_schema != null ? 1 : 0
+
+  rest_api_id  = var.api_id
+  name         = replace("${var.http_method}${var.resource_id}Model", "/[^a-zA-Z0-9]/", "")
+  content_type = "application/json"
+  schema       = var.request_model_schema
+}
+
 resource "aws_api_gateway_method" "this" {
   rest_api_id          = var.api_id
   resource_id          = var.resource_id
@@ -6,9 +15,11 @@ resource "aws_api_gateway_method" "this" {
   authorizer_id        = var.authorizer_id
   request_validator_id = var.request_validator_id
 
-  request_models = var.request_model_name != null ? {
+  request_models = var.request_model_schema != null ? {
+    "application/json" = aws_api_gateway_model.this[0].name
+  } : (var.request_model_name != null ? {
     "application/json" = var.request_model_name
-  } : null
+  } : null)
 }
 
 resource "aws_api_gateway_integration" "this" {

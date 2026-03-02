@@ -5,9 +5,8 @@ Reusable Terraform modules for AWS API Gateway following DDD/bounded context pat
 ## Modules
 
 - **rest-api** - Base REST API with deployment, stage, and logging
-- **rest-endpoint** - API Gateway resource + CORS + Lambda integration
-- **lambda-integration** - Lambda integration for existing resources
-- **cors-preflight** - CORS preflight (OPTIONS) for existing resources
+- **rest-resource** - API Gateway resource with optional CORS preflight
+- **method-handler** - HTTP method + Lambda integration + validation
 
 ## Usage Pattern
 
@@ -63,13 +62,14 @@ Wire Lambda handlers to API Gateway:
 ```hcl
 # modules/apis/public/main.tf
 module "public_api" {
-  source = "git::https://github.com/Comecacahuates/terraform-modules.git//api-gateway/rest-api?ref=v1.5.0"
+  source = "git::https://github.com/Comecacahuates/terraform-modules.git//api-gateway/rest-api?ref=v2.0.0"
 
   api_name    = "app-${var.environment}-public-api"
   environment = var.environment
 
   deployment_triggers = {
     leads_create = var.lambda_api_create_lead.invoke_arn
+    leads_list   = var.lambda_api_list_leads.invoke_arn
   }
 
   tags = var.tags
@@ -81,13 +81,25 @@ resource "aws_api_gateway_request_validator" "body" {
   validate_request_body = true
 }
 
+# Create /leads resource with CORS
+module "leads_resource" {
+  source = "git::https://github.com/Comecacahuates/terraform-modules.git//api-gateway/rest-resource?ref=v2.0.0"
+
+  api_id    = module.public_api.api_id
+  parent_id = module.public_api.root_resource_id
+  path_part = "leads"
+
+  cors_enabled = true
+  cors_methods = "GET,POST,OPTIONS"
+  cors_origin  = var.cors_allowed_origin
+}
+
 # POST /leads (with validation)
-module "create_lead_endpoint" {
-  source = "git::https://github.com/Comecacahuates/terraform-modules.git//api-gateway/rest-endpoint?ref=v1.5.0"
+module "create_lead_method" {
+  source = "git::https://github.com/Comecacahuates/terraform-modules.git//api-gateway/method-handler?ref=v2.0.0"
 
   api_id            = module.public_api.api_id
-  parent_id         = module.public_api.root_resource_id
-  path_part         = "leads"
+  resource_id       = module.leads_resource.resource_id
   http_method       = "POST"
   api_execution_arn = module.public_api.execution_arn
 
@@ -101,12 +113,11 @@ module "create_lead_endpoint" {
 }
 
 # GET /leads (no validation)
-module "list_leads_endpoint" {
-  source = "git::https://github.com/Comecacahuates/terraform-modules.git//api-gateway/rest-endpoint?ref=v1.5.0"
+module "list_leads_method" {
+  source = "git::https://github.com/Comecacahuates/terraform-modules.git//api-gateway/method-handler?ref=v2.0.0"
 
   api_id            = module.public_api.api_id
-  parent_id         = module.public_api.root_resource_id
-  path_part         = "leads"
+  resource_id       = module.leads_resource.resource_id
   http_method       = "GET"
   api_execution_arn = module.public_api.execution_arn
 
@@ -121,14 +132,14 @@ module "list_leads_endpoint" {
 
 - **Clean separation**: Business logic in bounded contexts, infrastructure in API modules
 - **Type-safe**: Validation schemas flow from Lambda to API Gateway
-- **Concise**: ~30 lines per Lambda handler, ~15 lines per endpoint
-- **Flexible**: Validation is optional, just omit when not needed
+- **Correct CORS**: One CORS configuration per resource, multiple methods per resource
+- **Concise**: ~30 lines per Lambda handler, ~15 lines per resource, ~10 lines per method
+- **Flexible**: Validation and CORS are optional
 - **DDD-aligned**: Bounded contexts are self-contained
 
 ## Module Details
 
 See individual module READMEs for detailed documentation:
 - [rest-api/README.md](./rest-api/README.md)
-- [rest-endpoint/README.md](./rest-endpoint/README.md)
-- [lambda-integration/README.md](./lambda-integration/README.md)
-- [cors-preflight/README.md](./cors-preflight/README.md)
+- [rest-resource/README.md](./rest-resource/README.md)
+- [method-handler/README.md](./method-handler/README.md)

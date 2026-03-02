@@ -3,13 +3,8 @@ variable "api_id" {
   type        = string
 }
 
-variable "parent_id" {
-  description = "Parent resource ID"
-  type        = string
-}
-
-variable "path_part" {
-  description = "Path segment for this resource"
+variable "resource_id" {
+  description = "API Gateway resource ID"
   type        = string
 }
 
@@ -28,22 +23,9 @@ variable "lambda_function_name" {
   type        = string
 }
 
-variable "cors_origin" {
-  description = "CORS allowed origin"
+variable "api_execution_arn" {
+  description = "API Gateway execution ARN for Lambda permissions"
   type        = string
-  default     = "*"
-}
-
-variable "cors_methods" {
-  description = "CORS allowed methods"
-  type        = string
-  default     = "GET,POST,PUT,DELETE,OPTIONS"
-}
-
-variable "cors_headers" {
-  description = "CORS allowed headers"
-  type        = string
-  default     = "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token"
 }
 
 variable "authorization" {
@@ -65,7 +47,7 @@ variable "request_validator_id" {
 }
 
 variable "request_model_name" {
-  description = "Request model name for validation"
+  description = "Request model name for validation (if model already exists)"
   type        = string
   default     = null
 }
@@ -76,7 +58,8 @@ variable "request_model_schema" {
   default     = null
 }
 
-variable "api_execution_arn" {
-  description = "API Gateway execution ARN for Lambda permissions"
+variable "cors_origin" {
+  description = "CORS allowed origin for response headers"
   type        = string
+  default     = "*"
 }

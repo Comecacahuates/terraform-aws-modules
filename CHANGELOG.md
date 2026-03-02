@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-03-01
+
+### Added
+- EventBridge Lambda trigger module
+  - `eventbridge/lambda-trigger` - EventBridge rule + target + Lambda permission
+- DynamoDB single-table module
+  - `dynamodb/single-table` - Opinionated single-table design with PK/SK and optional GSI1
+  - Environment-aware point-in-time recovery
+  - Configurable prevent_destroy lifecycle
+- API Gateway REST API module
+  - `api-gateway/rest-api` - Base REST API with deployment, stage, and logging
+  - Environment-aware log retention
+- API Gateway REST endpoint module
+  - `api-gateway/rest-endpoint` - Complete REST endpoint (resource + CORS + Lambda integration)
+  - Renamed from `endpoint` for clarity
+- API Gateway validation schema support
+  - Lambda modules now output `api_gateway_validation_schema`
+  - REST endpoint module creates validation model when schema provided
+- API Gateway overview README with DDD/bounded context pattern examples
+
+### Changed
+- Lambda Go module defaults reduced for minimal resource usage
+  - `timeout` default: 10s → 3s
+  - `memory_size` default: 256MB → 128MB
+- DynamoDB GSI now uses `key_schema` instead of deprecated `hash_key`/`range_key`
+
+### Deprecated
+- `api-gateway/endpoint` module (use `api-gateway/rest-endpoint` instead)
+
 ## [1.4.0] - 2026-02-14
 
 ### Added
