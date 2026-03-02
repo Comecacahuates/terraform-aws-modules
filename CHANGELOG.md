@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-03-01
+
+### Changed
+- API Gateway method-handler now creates request validator internally
+  - Removed `request_validator_id` variable
+  - Validator automatically created when `request_model_schema` is provided
+  - Simpler API - no manual validator creation needed
+
+### Removed
+- `request_validator_id` variable from method-handler (validator created automatically)
+- `request_model_name` variable from method-handler (use `request_model_schema` instead)
+
 ## [2.0.0] - 2026-03-01
 
 ### Added

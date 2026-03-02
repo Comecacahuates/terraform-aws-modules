@@ -40,20 +40,8 @@ variable "authorizer_id" {
   default     = null
 }
 
-variable "request_validator_id" {
-  description = "Request validator ID"
-  type        = string
-  default     = null
-}
-
-variable "request_model_name" {
-  description = "Request model name for validation (if model already exists)"
-  type        = string
-  default     = null
-}
-
 variable "request_model_schema" {
-  description = "JSON schema for request validation (creates model if provided)"
+  description = "JSON schema for request validation (creates validator and model if provided)"
   type        = string
   default     = null
 }

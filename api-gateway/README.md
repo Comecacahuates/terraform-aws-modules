@@ -75,12 +75,6 @@ module "public_api" {
   tags = var.tags
 }
 
-resource "aws_api_gateway_request_validator" "body" {
-  rest_api_id           = module.public_api.api_id
-  name                  = "validate-body"
-  validate_request_body = true
-}
-
 # Create /leads resource with CORS
 module "leads_resource" {
   source = "git::https://github.com/Comecacahuates/terraform-modules.git//api-gateway/rest-resource?ref=v2.0.0"
@@ -106,7 +100,6 @@ module "create_lead_method" {
   lambda_invoke_arn    = var.lambda_api_create_lead.invoke_arn
   lambda_function_name = var.lambda_api_create_lead.function_name
 
-  request_validator_id = aws_api_gateway_request_validator.body.id
   request_model_schema = var.lambda_api_create_lead.validation_schema
 
   cors_origin = var.cors_allowed_origin
