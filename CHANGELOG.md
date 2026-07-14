@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0] - 2026-07-14
+
+### Added
+- SNS handler pattern module
+  - `patterns/sns-handler` - Complete SNS → Lambda → optional DLQ pattern
+  - Creates Lambda function (Go, provided.al2023, x86_64) with IAM role
+  - Creates SNS topic subscription with Lambda permission
+  - Optional dead-letter queue on SNS subscription with CloudWatch alarm
+  - Symmetric API with `patterns/event-handler`
+
 ## [2.4.0] - 2026-07-14
 
 ### Added
