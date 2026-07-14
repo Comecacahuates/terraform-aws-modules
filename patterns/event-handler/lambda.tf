@@ -31,7 +31,11 @@ resource "aws_iam_role_policy" "lambda" {
           Resource = "arn:aws:logs:*:*:*"
         }
       ],
-      var.policy_statements
+      [for s in var.policy_statements : {
+        Effect   = "Allow"
+        Action   = s.Action
+        Resource = s.Resource
+      }]
     )
   })
 }
