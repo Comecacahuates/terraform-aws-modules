@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0] - 2026-07-14
+
+### Added
+- Event handler pattern module
+  - `patterns/event-handler` - Complete EventBridge → Lambda → DLQ → CloudWatch alarm pattern
+  - Creates Lambda function (Go, provided.al2023, x86_64) with IAM role and policy
+  - Creates EventBridge rule + target with Lambda permission
+  - Optional dead-letter queue with configurable retries and max event age
+  - Optional CloudWatch alarm on DLQ messages → SNS notification
+  - Single module call replaces lambda/go + eventbridge/lambda-trigger + manual DLQ setup
+
 ## [2.3.0] - 2026-03-01
 
 ### Added
