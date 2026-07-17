@@ -38,6 +38,12 @@ variable "enable_spa_routing" {
   default     = true
 }
 
+variable "response_headers_policy_id" {
+  description = "CloudFront response headers policy ID (optional)"
+  type        = string
+  default     = null
+}
+
 variable "tags" {
   description = "Tags to apply to resources"
   type        = map(string)

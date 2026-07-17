@@ -46,6 +46,8 @@ resource "aws_cloudfront_distribution" "website" {
     cached_methods         = ["GET", "HEAD"]
     compress               = true
 
+    response_headers_policy_id = var.response_headers_policy_id
+
     forwarded_values {
       query_string = false
       cookies {
