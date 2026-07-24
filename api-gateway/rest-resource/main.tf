@@ -44,6 +44,8 @@ resource "aws_api_gateway_method_response" "options" {
 resource "aws_api_gateway_integration_response" "options" {
   count = var.cors_enabled ? 1 : 0
 
+  depends_on = [aws_api_gateway_method_response.options]
+
   rest_api_id = var.api_id
   resource_id = aws_api_gateway_resource.this.id
   http_method = aws_api_gateway_method.options[0].http_method
